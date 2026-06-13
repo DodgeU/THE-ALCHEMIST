@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alchemist's Roguelike</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        
+        <!-- VFX CANVAS -->
+        <canvas id="vfx-canvas"></canvas>
+
+        <!-- RELIC BAR -->
+        <div id="relic-bar"></div>
+
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <h1 style="text-align:center; margin-bottom: 1rem; font-size: 6rem; text-shadow: 0 0 30px var(--accent-purple); color: #fff; letter-spacing: 5px;">THE ALCHEMIST</h1>
+            <p style="text-align:center; margin-bottom: 4rem; color: #aaa; font-size: 1.2rem; max-width: 600px;">Kartları topla, Yadigârları bul ve Baş Simyacı'yı alt et.</p>
+            <div style="display:flex; gap: 2rem;">
+                <button id="btn-start-game" class="main-btn">Yeni Oyun</button>
+                <button onclick="showMetaScreen(); playSound('click');" class="main-btn" style="border-color: var(--accent-green);">Geliştirmeler</button>
+                <button onclick="showCompendiumScreen(); playSound('click');" class="main-btn" style="border-color: #00aaff;">Koleksiyon</button>
+            </div>
+        </div>
+
+        <!-- META SCREEN -->
+        <div id="meta-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 1rem; font-size: 3rem; color: var(--accent-purple); text-shadow: 0 0 20px var(--accent-purple);">Karanlık Sunaklar</h1>
+            <h2 style="text-align:center; margin-bottom: 3rem; color: #00ff88;">Mevcut Ruh: <span id="meta-souls-text">0</span> 👻</h2>
+            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;" id="meta-upgrades-container"></div>
+            <button class="main-btn" onclick="switchScreen('start-screen'); playSound('click');" style="margin-top: 4rem; padding: 1rem 3rem; border-color: #555;">Geri Dön</button>
+        </div>
+
+        <!-- COMPENDIUM SCREEN -->
+        <div id="compendium-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 2rem; font-size: 3rem; color: #00aaff; text-shadow: 0 0 20px #00aaff;">Koleksiyon</h1>
+            <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;">
+                <button class="main-btn" id="tab-cards" onclick="renderCompendium('cards'); playSound('click');" style="padding: 1rem 2rem; border-color:var(--accent-purple); font-size:1.2rem;">Kartlar</button>
+                <button class="main-btn" id="tab-relics" onclick="renderCompendium('relics'); playSound('click');" style="padding: 1rem 2rem; border-color:#555; font-size:1.2rem;">Yadigârlar</button>
+            </div>
+            <div id="compendium-grid" style="display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; overflow-y:auto; max-height:60vh; padding:1rem; max-width:1200px;"></div>
+            <button class="main-btn" onclick="switchScreen('start-screen'); playSound('click');" style="margin-top: 2rem; padding: 1rem 3rem; border-color: #555;">Geri Dön</button>
+        </div>
+
+        <!-- CLASS SELECT SCREEN -->
+        <div id="class-select-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 3rem; font-size: 3.5rem; text-shadow: 0 0 20px var(--accent-gold); color: #fff;">Sınıfını Seç</h1>
+            <div style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;">
+                <div class="class-card" onclick="initGameWithClass('alchemist')">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🧪</div>
+                    <h2 style="color: var(--accent-green);">Simyacı</h2>
+                    <p style="color: #aaa; margin-top: 1rem;">Dengeli. Zehir ve Ateş ustası.</p>
+                </div>
+                <div class="class-card" onclick="initGameWithClass('bloodmage')">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🩸</div>
+                    <h2 style="color: #ff2a4a;">Kara Büyücü</h2>
+                    <p style="color: #aaa; margin-top: 1rem;">Riskli. Canını feda et, gücü hisset.</p>
+                </div>
+                <div class="class-card" onclick="initGameWithClass('elementalist')">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">❄️</div>
+                    <h2 style="color: #00aaff;">Elementalist</h2>
+                    <p style="color: #aaa; margin-top: 1rem;">Savunmacı. Yüksek kalkan ve motor.</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem; text-align: center; background: rgba(0,0,0,0.8); padding: 1.5rem; border: 1px solid var(--accent-gold); border-radius: 12px;">
+                <h3 style="color: var(--accent-gold); margin-bottom: 1rem;">Zorluk Seviyesi (Ascension)</h3>
+                <div style="display:flex; justify-content:center; align-items:center; gap: 1rem;">
+                    <button class="main-btn" onclick="changeAscension(-1)" style="padding: 0.5rem 1rem; border-color: #555;">&lt;</button>
+                    <div id="ascension-display" style="font-size: 2rem; font-weight: bold; width: 50px;">0</div>
+                    <button class="main-btn" onclick="changeAscension(1)" style="padding: 0.5rem 1rem; border-color: #555;">&gt;</button>
+                </div>
+                <div id="ascension-desc" style="color: #ccc; margin-top: 1rem; min-height: 20px;">Standart Zorluk</div>
+            </div>
+
+            <button class="main-btn" onclick="switchScreen('start-screen'); playSound('click');" style="margin-top: 2rem; padding: 1rem 3rem; border-color: #555;">Geri Dön</button>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="game-over-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 2rem; font-size: 4rem; color: var(--health-color); text-shadow: 0 0 20px var(--health-color);">ÖLDÜN</h1>
+            <p id="game-over-stats" style="text-align:center; margin-bottom: 3rem; color: #aaa; font-size: 1.5rem;"></p>
+            <button id="btn-restart-game" class="main-btn" style="border-color: var(--health-color);">Tekrar Dene</button>
+        </div>
+
+        <!-- VICTORY SCREEN -->
+        <div id="victory-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 2rem; font-size: 4rem; color: var(--accent-gold); text-shadow: 0 0 30px var(--accent-gold);">ZAFER!</h1>
+            <p style="text-align:center; margin-bottom: 3rem; color: #ccc; font-size: 1.5rem;">Baş Simyacı'yı yendin ve ustalık mertebesine eriştin.</p>
+            <button id="btn-victory-restart" class="main-btn" style="border-color: var(--accent-gold);">Yeniden Oyna</button>
+        </div>
+
+        <!-- EVENT SCREEN -->
+        <div id="event-screen" class="screen">
+            <h1 id="event-title" style="text-align:center; margin-bottom: 2rem; font-size: 3rem; color: var(--accent-purple); text-shadow: 0 0 20px var(--accent-purple);">Gizemli Olay</h1>
+            <p id="event-desc" style="text-align:center; margin-bottom: 4rem; color: #ccc; font-size: 1.3rem; max-width: 800px; line-height: 1.6;"></p>
+            <div style="display: flex; gap: 2rem; justify-content: center;" id="event-buttons"></div>
+        </div>
+
+        <!-- CAMP SCREEN -->
+        <div id="camp-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 2rem; font-size: 3rem; color: var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold);">Dinlenme Kampı</h1>
+            <div style="font-size: 5rem; text-align: center; margin-bottom: 3rem; animation: float 3s infinite;">🔥</div>
+            <div style="display: flex; gap: 3rem; justify-content: center;">
+                <button id="btn-camp-rest" class="main-btn" style="border-color: var(--accent-green); display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                    <span>DİNLEN</span>
+                    <span style="font-size: 0.9rem; font-weight:normal; color:#aaa;" id="camp-heal-amount">Canını Yenile</span>
+                </button>
+                <button id="btn-camp-smith" class="main-btn" style="border-color: #ffaa00; display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                    <span>DEMİRCİ</span>
+                    <span style="font-size: 0.9rem; font-weight:normal; color:#aaa;">1 Kart Geliştir</span>
+                </button>
+                <button id="btn-camp-meditate" class="main-btn" style="border-color: var(--accent-purple); display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                    <span>MEDİTASYON</span>
+                    <span style="font-size: 0.9rem; font-weight:normal; color:#aaa;">1 Kart Sil</span>
+                </button>
+            </div>
+            <div style="text-align:center; margin-top: 3rem;">
+                <div class="health-container" style="display:inline-block; border-color: rgba(176, 38, 255, 0.4);">
+                    <div class="health-bar-bg" style="width: 200px; margin: 0 auto;">
+                        <div class="health-bar-fill" id="camp-player-hp-fill" style="width: 100%; background: linear-gradient(90deg, #500080, #b026ff);"></div>
+                    </div>
+                    <div class="health-text" id="camp-player-hp-text">65 / 65</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DECK VIEW OVERLAY -->
+        <div id="deck-overlay">
+            <h2 id="deck-overlay-title" style="text-align:center; font-size:2rem; margin-bottom:2rem; color:var(--accent-gold);">Silmek istediğin kartı seç</h2>
+            <div id="deck-overlay-grid"></div>
+            <button id="btn-close-deck" class="main-btn" style="margin-top: 2rem; font-size:1rem; padding: 0.8rem 2rem;">İptal</button>
+        </div>
+
+        <!-- MAP SCREEN -->
+        <div id="map-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 3rem; font-size: 3rem; text-shadow: 0 0 20px var(--accent-purple);">KAT <span id="floor-number">1</span></h1>
+            <h2 style="text-align:center; margin-bottom: 2rem; color: #ccc;">Yolunu Seç</h2>
+            <div class="map-paths" id="map-paths"></div>
+            
+            <div style="margin-top: 5rem; text-align: center;">
+                <div class="health-container" style="display:inline-block; border-color: rgba(176, 38, 255, 0.4);">
+                    <div class="entity-name" style="color: #b026ff;">Simyacı</div>
+                    <div class="health-bar-bg" style="width: 200px; margin: 0 auto;">
+                        <div class="health-bar-fill" id="map-player-hp-fill" style="width: 100%; background: linear-gradient(90deg, #500080, #b026ff);"></div>
+                    </div>
+                    <div class="health-text" id="map-player-hp-text">65 / 65</div>
+                    <div style="margin-top: 10px; color: #aaa; font-weight: bold;">Deste: <span id="map-deck-count">12</span> Kart</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REWARD SCREEN -->
+        <div id="reward-screen" class="screen">
+            <h1 style="text-align:center; margin-bottom: 1rem; color: var(--accent-gold); text-shadow: 0 0 20px var(--accent-gold); font-size: 3rem;">SAVAŞ KAZANILDI!</h1>
+            <h2 style="text-align:center; margin-bottom: 3rem; color: #ccc;" id="reward-title">Destene eklemek için bir kart seç</h2>
+            <div id="reward-cards" style="display: flex; justify-content: center; gap: 3rem; align-items: center; height: 350px;"></div>
+            <button id="skip-reward-btn">Kart Almadan Geç</button>
+        </div>
+
+        <!-- COMBAT SCREEN -->
+        <div id="combat-screen" class="screen">
+            <!-- Enemy Area -->
+            <div id="enemy-area">
+                <div class="intent-indicator">
+                    <span>⚔️</span>
+                    <span>18 Hasar</span>
+                </div>
+                <div class="enemy-sprite"></div>
+                <div class="health-container">
+                    <div class="entity-name" id="enemy-name" style="color: #ff2a4a; text-shadow: 0 0 10px #ff2a4a;">Bilinmeyen Varlık</div>
+                    <div class="health-bar-bg"><div class="health-bar-fill" style="width: 100%;"></div></div>
+                    <div class="health-text" id="enemy-hp-text">120 / 120</div>
+                    <div class="status-area" id="enemy-status"></div>
+                </div>
+            </div>
+
+            <!-- End Turn Button -->
+            <button id="end-turn-btn">Turu Bitir</button>
+
+            <!-- Cauldron & Potion Belt -->
+            <div id="cauldron-area">
+                <div class="cauldron-glow">
+                    <div class="energy-orb">
+                        <div class="energy-text-wrapper" id="energy-value">3</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; font-weight: 800; letter-spacing: 3px; color: #00ff88; text-shadow: 0 0 10px #00ff88;">ODAK</div>
+                
+                <!-- POTION BELT -->
+                <div id="potion-belt">
+                    <div class="potion-slot" id="potion-slot-0"></div>
+                    <div class="potion-slot" id="potion-slot-1"></div>
+                    <div class="potion-slot" id="potion-slot-2"></div>
+                </div>
+            </div>
+
+            <!-- Player Info -->
+            <div class="player-info">
+                <div class="health-container" style="border-color: rgba(176, 38, 255, 0.4);">
+                    <div class="entity-name" style="color: #b026ff; text-shadow: 0 0 10px #b026ff;">Simyacı</div>
+                    <div class="health-bar-bg"><div class="health-bar-fill" style="width: 100%; background: linear-gradient(90deg, #500080, #b026ff); box-shadow: 0 0 10px #b026ff;"></div></div>
+                    <div class="health-text" id="combat-player-hp-text">65 / 65</div>
+                    <div class="status-area" id="player-status"></div>
+                </div>
+            </div>
+
+            <!-- Deck Area -->
+            <div class="deck-area">
+                <div style="text-align: center;">
+                    <div class="discard">0</div>
+                    <div style="font-size: 0.8rem; margin-top: 8px; color: #888; text-transform: uppercase; font-weight: bold;">Çöplük</div>
+                </div>
+                <div style="text-align: center;">
+                    <div class="deck">12</div>
+                    <div style="font-size: 0.8rem; margin-top: 8px; color: #b026ff; text-transform: uppercase; font-weight: bold;">Deste</div>
+                </div>
+            </div>
+
+            <!-- Hand Area -->
+            <div id="hand-area"></div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
