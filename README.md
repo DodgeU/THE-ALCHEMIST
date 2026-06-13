@@ -1,13 +1,13 @@
-# The Alchemist 🧪🩸❄️
+# The Alchemist 
 
 A hardcore, browser-based rogue-lite deckbuilder built entirely with pure Vanilla JavaScript, HTML, and CSS. No libraries, no canvas (except for particle VFX), no image files—just pure code and procedural generation!
 
 ## Features
 
 - **3 Unique Classes:** 
-  - 🧪 **Alchemist:** Master of poison and fire mechanics.
-  - 🩸 **Bloodmage:** High-risk, high-reward lifesteal and self-damage abilities.
-  - ❄️ **Elementalist:** Defensive powerhouse utilizing shield accumulation and engine mechanics.
+  - **Alchemist:** Master of poison and fire mechanics.
+  - **Bloodmage:** High-risk, high-reward lifesteal and self-damage abilities.
+  - **Elementalist:** Defensive powerhouse utilizing shield accumulation and engine mechanics.
 - **Rogue-lite Meta Progression:** Dying is not the end. Collect souls based on the floor you reached and permanently upgrade your stats (Max HP, Starting Strength, or Relics) at the Dark Shrines.
 - **Dynamic Web Audio Synthesizer:** All sound effects (swish, hit, shield, heal, click) are procedurally generated in real-time using the browser's native Web Audio API. Zero external audio files!
 - **30 Floors of Agony:** Battle through 30 floors of scaling enemies. Face the Act 1 Boss at Floor 15, and the Final Boss (The Grand Alchemist) at Floor 30.
